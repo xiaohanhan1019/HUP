@@ -3,6 +3,7 @@ from Preprocess import *
 
 from FileTool import *
 
+
 class ProcessTrain():
     @classmethod
     def split_data_train_test_file(cls, folder, file_in, file_out, max_line=-1, ratio_train=0.982):
@@ -27,7 +28,7 @@ class ProcessTrain():
                 else:
                     fout_test.write(line)
                 lineCnt += 1
-                if(max_line > 0 and lineCnt >= max_line):
+                if (max_line > 0 and lineCnt >= max_line):
                     break
 
         fout_train.close()
@@ -42,7 +43,7 @@ class ProcessTrain():
         """
         print "split_data_train_test_file_batch..."
         file_in = [file_in]
-        #file_in=[file_in, file_in + ".SBD.id", file_in + ".SBCD.id"]
+        # file_in=[file_in, file_in + ".SBD.id", file_in + ".SBCD.id"]
         N = len(file_in)
 
         fin = [None] * N
@@ -68,7 +69,7 @@ class ProcessTrain():
             flinelist[i] = FileTool.read_line_to_list_str(fin[i])
 
         totalLineCnt = len(flinelist[0])
-        if(max_line > 0 and max_line < totalLineCnt):
+        if (max_line > 0 and max_line < totalLineCnt):
             totalLineCnt = max_line
 
         for j in range(totalLineCnt):
@@ -87,14 +88,13 @@ class ProcessTrain():
 
         print "split_data_train_test_file_batch done!"
 
-
     @classmethod
-    #get len 40 and split
+    # get len 40 and split
     def format_data_train_test(cls, folder, file_in, file_mapping, seqlen):
         FileTool.func_begin("format_data_train_test")
-        #sesseion.SBCD.id.len40.train train截断
+        # sesseion.SBCD.id.len40.train train截断
         ProcessTrain.format_data_train_test_parse_line_save_one(folder, file_in, "train", file_mapping, seqlen)
-        #sesseion.SBCD.id.len40.test test截断
+        # sesseion.SBCD.id.len40.test test截断
         ProcessTrain.format_data_train_test_parse_line_save_one(folder, file_in, "test", file_mapping, seqlen)
         # sesseion.SBCD.id.len40.train.div
         ProcessTrain.format_data_train_test_parse_line_div(folder, file_in, "train", file_mapping, seqlen)
@@ -110,15 +110,16 @@ class ProcessTrain():
         file_out = file + ".len" + str(seqlen) + "." + file_tag
         file_in = FileTool.add_folder(folder, file_in)
         file_out = FileTool.add_folder(folder, file_out)
-        file_mapping_f=FileTool.add_folder(folder, file_mapping)
+        file_mapping_f = FileTool.add_folder(folder, file_mapping)
         dict_sessionId_sessionStr = FileTool.load_file_map_idInt_to_itemStr(file_mapping_f)  # item整体的mapping
 
         listlist = FileTool.read_file_to_list_list(file_in)  # session数据, reindex以后的
         resList = []
         for line in listlist:
             itemList = line[0:seqlen]  # 截取了前seqlen个
-            itemList = ProcessTrain.pro_lineEnd_duplicateSku_listid_map(itemList, dict_sessionId_sessionStr)  # 保证预测的物品id不是最后一次点击
-            if(len(itemList) > 0):
+            itemList = ProcessTrain.pro_lineEnd_duplicateSku_listid_map(itemList,
+                                                                        dict_sessionId_sessionStr)  # 保证预测的物品id不是最后一次点击
+            if (len(itemList) > 0):
                 resList.append(itemList)
         FileTool.write_file_list_list(file_out, resList, Config.file_sep)
         FileTool.func_end("format_data_train_test_parse_line_save_one")
@@ -136,11 +137,11 @@ class ProcessTrain():
         listlist = FileTool.read_file_to_list_list(file_in)
         resList = []
         for line in listlist:
-            length=len(line)
-            for start in range(0, length-seqlen, Config.seq_split_step):
-                itemList = line[start: start+seqlen]
+            length = len(line)
+            for start in range(0, length - seqlen, Config.seq_split_step):
+                itemList = line[start: start + seqlen]
                 itemList = ProcessTrain.pro_lineEnd_duplicateSku_listid_map(itemList, dict_sessionId_sessionStr)
-                if(len(itemList) > 0):
+                if (len(itemList) > 0):
                     resList.append(itemList)
         FileTool.write_file_list_list(file_out, resList, Config.file_sep)
         FileTool.func_end("format_data_train_test_parse_line_div")
@@ -224,7 +225,7 @@ class ProcessTrain():
                     w = [padding_str] * pad_cnt
 
             w.extend(line)
-            #line = ' '.join(w)
+            # line = ' '.join(w)
             res.append(w)
 
             pro += 1
@@ -235,11 +236,13 @@ class ProcessTrain():
         pass
 
     @classmethod
-    def generate_sequence_data_limitLen_padded_from_candidate(cls, list_list, minLen, maxLen, mapIdStr, padding_str="0"):
+    def generate_sequence_data_limitLen_padded_from_candidate(cls, list_list, minLen, maxLen, mapIdStr,
+                                                              padding_str="0"):
         print "generate_sequence_data_from_candidate start..."
         listList = ProcessTrain.generate_sequence_data_from_candidate_split(list_list, minLen, maxLen)
         listList_endUniqSku = ProcessTrain.filt_sequence_data_endUniSku(listList, mapIdStr)
-        listlist_padded = ProcessTrain.generate_sequence_data_from_candidate_padding(listList_endUniqSku, maxLen, padding_str)
+        listlist_padded = ProcessTrain.generate_sequence_data_from_candidate_padding(listList_endUniqSku, maxLen,
+                                                                                     padding_str)
         res = listlist_padded
         return res
         pass
@@ -251,7 +254,6 @@ class ProcessTrain():
             cur = ProcessTrain.pro_lineEnd_duplicateSku_id_map(line, mapIdStr)
             resList.append(cur)
         return resList
-
 
     # raw data to session file(id of each micro item)
     @classmethod
@@ -302,7 +304,7 @@ class ProcessTrain():
         i = N - 1
         while (i > 0):
             curItem = mapIdStr[int(list[i])]
-            prevItem =  mapIdStr[int(list[i-1])]
+            prevItem = mapIdStr[int(list[i - 1])]
             if (ProcessTrain.is_same_sku(curItem, prevItem)):
                 i -= 1
             else:
@@ -311,18 +313,18 @@ class ProcessTrain():
         return resList
 
     @classmethod
-    #process session data multi item has same sku,
-    #goal: in predict, last sku not the same with before
+    # process session data multi item has same sku,
+    # goal: in predict, last sku not the same with before
     def pro_lineEnd_duplicateSku(cls, list):
         resList = []
         N = len(list)
-        i = N-1
-        while(i > 0):
-            if(ProcessTrain.is_same_sku(list[i], list[i-1])):
+        i = N - 1
+        while (i > 0):
+            if (ProcessTrain.is_same_sku(list[i], list[i - 1])):
                 i -= 1
             else:
                 break
-        resList = list[0:i+1]
+        resList = list[0:i + 1]
         return resList
 
     @classmethod
@@ -333,8 +335,8 @@ class ProcessTrain():
         N = len(list)
         i = N - 1
         while (i > 0):
-            cur=dictIdItemStr[int(list[i])]
-            pre=dictIdItemStr[int(list[i-1])]
+            cur = dictIdItemStr[int(list[i])]
+            pre = dictIdItemStr[int(list[i - 1])]
             if (ProcessTrain.is_same_sku(cur, pre)):
                 i -= 1
             else:
@@ -342,7 +344,7 @@ class ProcessTrain():
         resList = list[0:i + 1]
         return resList
 
-    #last sku must not be the same as before
+    # last sku must not be the same as before
     @classmethod
     def get_data_session_process_lineEnd_duplicateSku(cls, folder, file_in, file_out):
         FileTool.func_begin("get_data_session_process_lineEnd_duplicateSku")
@@ -350,21 +352,20 @@ class ProcessTrain():
         file_out = FileTool.add_folder(folder, file_out)
         listlist = FileTool.read_file_to_list_list(file_in)
 
-        resList=[]
+        resList = []
 
         i = 0
         for list in listlist:
             list = ProcessTrain.pro_lineEnd_duplicateSku(list)
             resList.append(list)
-            i+=1
+            i += 1
 
             FileTool.print_info_pro(i, len(listlist))
         FileTool.printListList(resList, file_out, Config.file_sep)
 
         FileTool.func_end("get_data_session_process_lineEnd_duplicateSku")
 
-
-    #format seq to same len
+    # format seq to same len
     @classmethod
     def get_file_process_sequence(cls, folder, file_id, file_mapping):
 
@@ -373,21 +374,19 @@ class ProcessTrain():
 
         mapIdStr = FileTool.load_file_map_idInt_to_itemStr(os.path.join(folder, file_mapping), Config.file_sep)
 
-        #get seq data: limit len, padded
+        # get seq data: limit len, padded
         ProcessTrain.get_sequence_data_limitLen_padded(file_id_, file_id_len_, mapIdStr)
 
-        #list_list_padded = FileTool.read_file_to_list_list(file_id_len_)
-
+        # list_list_padded = FileTool.read_file_to_list_list(file_id_len_)
 
         print ""
 
-
-    #get seq file with micro item set
+    # get seq file with micro item set
     @classmethod
     def get_file_micro_items_sequence(cls, folder, file_id, file_mapping, seqlen):
         FileTool.func_begin("get_file_micro_items_sequence")
 
-        file_len =  ".len" + str(seqlen)
+        file_len = ".len" + str(seqlen)
         file_mapping_f = FileTool.add_folder(folder, file_mapping)
         dict_sessionId_sessionStr = FileTool.load_file_map_idInt_to_itemStr(file_mapping_f)
 
@@ -402,52 +401,51 @@ class ProcessTrain():
             # file_id_sbcd = FileTool.add_folder(folder, file_id_len + ".SBCD" + file_tag)
             file_id_sbcgd = FileTool.add_folder(folder, file_id_len + ".SBCGD" + file_tag)
 
-            #print file_id_s
+            # print file_id_s
 
-            #micro_item2id = Data.load_micro_item_id(Config.micro_item_list)
+            # micro_item2id = Data.load_micro_item_id(Config.micro_item_list)
 
             listSessionId_list = FileTool.read_file_to_list_list(file_id_f, Config.file_sep, "0")
 
-            list_s_list = []
-            list_c_list = []
-            list_sbd_list = []
-            list_sbcd_list = []
+            # list_s_list = []
+            # list_c_list = []
+            # list_sbd_list = []
+            # list_sbcd_list = []
             list_sbcgd_list = []
             i = 0
 
             print "process sequence..."
             print len(listSessionId_list)
             for listSessionId in listSessionId_list:
-                list_s = []
-                list_c = []
-                list_sbd= []
-                list_sbcd = []
+                # list_s = []
+                # list_c = []
+                # list_sbd= []
+                # list_sbcd = []
                 list_sbcgd = []
                 for sessionId in listSessionId:
                     sessionStr = dict_sessionId_sessionStr[int(sessionId)]
                     sessionItem = SessionItem(sessionStr)
-                    sessionItem_s = sessionItem.get_subId("S")
-                    sessionItem_c = sessionItem.get_subId("C")
-                    sessionItem_sbd = sessionItem.get_subId("SBD")
-                    sessionItem_sbcd = sessionItem.get_subId("SBCD")
+                    # sessionItem_s = sessionItem.get_subId("S")
+                    # sessionItem_c = sessionItem.get_subId("C")
+                    # sessionItem_sbd = sessionItem.get_subId("SBD")
+                    # sessionItem_sbcd = sessionItem.get_subId("SBCD")
                     sessionItem_sbcgd = sessionItem.get_subId("SBCGD")
-                    list_s.append(sessionItem_s)
-                    list_c.append(sessionItem_c)
-                    list_sbd.append(sessionItem_sbd)
-                    list_sbcd.append(sessionItem_sbcd)
+                    # list_s.append(sessionItem_s)
+                    # list_c.append(sessionItem_c)
+                    # list_sbd.append(sessionItem_sbd)
+                    # list_sbcd.append(sessionItem_sbcd)
                     list_sbcgd.append(sessionItem_sbcgd)
 
-                list_s = StructureTool.uniq_list(list_s)  # 这样同样会删除连续相同的
-                list_c = list_c
-                list_sbd = StructureTool.uniq_list(list_sbd)
-                list_sbcd = StructureTool.uniq_list(list_sbcd)
+                # list_s = StructureTool.uniq_list(list_s)  # 这样同样会删除连续相同的
+                # list_c = list_c
+                # list_sbd = StructureTool.uniq_list(list_sbd)
+                # list_sbcd = StructureTool.uniq_list(list_sbcd)
                 list_sbcgd = StructureTool.uniq_list(list_sbcgd)
 
-
-                list_s_list.append(list_s)
-                list_c_list.append(list_c)
-                list_sbd_list.append(list_sbd)
-                list_sbcd_list.append(list_sbcd)
+                # list_s_list.append(list_s)
+                # list_c_list.append(list_c)
+                # list_sbd_list.append(list_sbd)
+                # list_sbcd_list.append(list_sbcd)
                 list_sbcgd_list.append(list_sbcgd)
 
                 i += 1
@@ -506,7 +504,7 @@ class ProcessTrain():
         file_id_len = ".len" + str(Config.seq_len)
         file_base = file_id + file_id_len + "." + mode
 
-        #statis data to .reidx, .mapping
+        # statis data to .reidx, .mapping
         dictItemStrId = {}
         dictItemIdStr = {}
 
@@ -520,7 +518,7 @@ class ProcessTrain():
 
         i = 0
         for file_tag in [".train", ".test", ".train.div"]:
-            file_in =  file_id + file_id_len + "." + mode + file_tag
+            file_in = file_id + file_id_len + "." + mode + file_tag
             file_out = file_id + file_id_len + "." + mode + ".id" + file_tag
             file_in = FileTool.add_folder(folder, file_in)
             file_out = FileTool.add_folder(folder, file_out)
@@ -530,7 +528,7 @@ class ProcessTrain():
             for list in listlist:
                 item_id_list = []
                 for item in list:
-                    if(item not in dictItemStrId):
+                    if (item not in dictItemStrId):
                         dictItemStrId[item] = map_id  # id2item
                         dictItemIdStr[map_id] = item  # item2id
                         map_id += 1
@@ -551,14 +549,13 @@ class ProcessTrain():
                                                                                                   Config.paddingStr)
             FileTool.printListList(list_list_data_id_padded, file_out)
 
-        file_redix = FileTool.add_folder(folder,  file_base + ".reidx")
-        file_mapping = FileTool.add_folder(folder,  file_base + ".mapping")
+        file_redix = FileTool.add_folder(folder, file_base + ".reidx")
+        file_mapping = FileTool.add_folder(folder, file_base + ".mapping")
 
         FileTool.printDict(dictItemStrId, file_mapping)
         FileTool.printDictEmb(dict_itemId_emb, file_redix, Config.file_sep)
 
         FileTool.func_end("build_session_data_train")
-
 
     @classmethod
     def get_sequence_data_limitLen_padded(cls, file_id, file_id_len, mapIdStr):
@@ -566,14 +563,18 @@ class ProcessTrain():
 
         list_list = FileTool.read_file_to_list_list(file_id, sep=Config.file_sep)
 
-        paddingStr=Config.paddingStr
-        list_list_padded = ProcessTrain.generate_sequence_data_limitLen_padded_from_candidate(list_list,  Config.seq_len_min, Config.seq_len_max, mapIdStr, padding_str=paddingStr)
+        paddingStr = Config.paddingStr
+        list_list_padded = ProcessTrain.generate_sequence_data_limitLen_padded_from_candidate(list_list,
+                                                                                              Config.seq_len_min,
+                                                                                              Config.seq_len_max,
+                                                                                              mapIdStr,
+                                                                                              padding_str=paddingStr)
 
         FileTool.printListList(list_list_padded, file_id_len)
 
         print "get_sequence_data_limitLen_padded done!"
 
-        #return list_list_padded
+        # return list_list_padded
 
         pass
 
@@ -585,7 +586,7 @@ class ProcessTrain():
     @classmethod
     def get_data_item_uniq(cls, type_item):
         print "get_data_item_uniq %s..." % type_item
-        #get data uniq
+        # get data uniq
         file_uniq = type_item + ".uniq"
 
         file_raw = type_item + ".raw"
@@ -594,15 +595,15 @@ class ProcessTrain():
         emb_size = Config.dict_emb_item_size[type_item]
 
         item2wgt = Data.load_w2v_weights_name(type_item)
-        item2id =  Data.load_id_file(Config.add_folder(type_item + ".mapping"))
+        item2id = Data.load_id_file(Config.add_folder(type_item + ".mapping"))
 
         print "item2wgt:", len(item2wgt)
         print "item2id:", len(item2id)
         #
 
-        ProcessTrain.get_data_item_uniq_from_raw_filt_by_w2v(Config.folder, file_raw, file_uniq, item2wgt, item2id, Config.seq_len_min, Config.seq_len_max)
+        ProcessTrain.get_data_item_uniq_from_raw_filt_by_w2v(Config.folder, file_raw, file_uniq, item2wgt, item2id,
+                                                             Config.seq_len_min, Config.seq_len_max)
         pass
-
 
     '''
     data_raw => data_uniq
@@ -611,7 +612,8 @@ class ProcessTrain():
     '''
 
     @classmethod
-    def get_data_item_uniq_from_raw_filt_by_w2v(cls, folder, file_in, file_out, item2wgt, item2id, seq_len_min, seq_len_max):
+    def get_data_item_uniq_from_raw_filt_by_w2v(cls, folder, file_in, file_out, item2wgt, item2id, seq_len_min,
+                                                seq_len_max):
 
         print "get_data_item_uniq_from_raw_filt_by_w2v %s..." % file_in
         i = 0
@@ -620,7 +622,7 @@ class ProcessTrain():
         file_out = FileTool.add_folder(folder, file_out)
 
         list_lines = []
-        #filt valid data
+        # filt valid data
         with open(file_in, "r") as f:
             for l in f:
                 if i % 100000 == 0:
@@ -628,102 +630,101 @@ class ProcessTrain():
                 events = l.strip().split()
 
                 save = []
-                #remove duplicate
+                # remove duplicate
                 save = StructureTool.uniq_list(events)
 
-                #print "save:", save
+                # print "save:", save
 
-                #check valid
+                # check valid
                 flag = 0
                 save_new = []
                 for k in range(len(save)):
                     e = str(save[k])
                     if e not in item2wgt or e not in item2id:
-                        #print "Error e:", e
+                        # print "Error e:", e
                         flag = 1
-                        #break
+                        # break
                     else:
                         save_new.append(str(item2id[e]))
 
-                if(len(save_new) > 0):
+                if (len(save_new) > 0):
                     list_lines.append(save_new)
 
-                i+=1
+                i += 1
                 FileTool.print_info_pro(i)
 
-        #generate sequence data
-        listlist_res = ProcessTrain.generate_sequence_data_limitLen_padded_from_candidate(list_lines, Config.seq_len_min, Config.seq_len_max)
+        # generate sequence data
+        listlist_res = ProcessTrain.generate_sequence_data_limitLen_padded_from_candidate(list_lines,
+                                                                                          Config.seq_len_min,
+                                                                                          Config.seq_len_max)
         FileTool.printListList(listlist_res, file_out)
 
         print "get_data_item_uniq_from_raw_filt_by_w2v done!"
 
     @classmethod
-    def split_data_train_test(cls,  folder, file, file_mapping, max_line_cnt=-1, ratio_train=0.7):
+    def split_data_train_test(cls, folder, file, file_mapping, max_line_cnt=-1, ratio_train=0.7):
         print "split_data_train_test %s..." % file
-        #session.SBCGD.id to session.SBCGD.id.train, session.SBCGD.id.test
+        # session.SBCGD.id to session.SBCGD.id.train, session.SBCGD.id.test
         ProcessTrain.split_data_train_test_file_batch(folder, file, max_line_cnt, ratio_train)
-
 
         pass
 
     @classmethod
     def get_map_sku_cid3(cls):
         ProcessTrain.get_map_sku_cid3_org(Config.file_data_src, Config.file_map_sku_cid3)
-        ProcessTrain.get_map_sku_cid3_id(Config.file_map_sku_cid3, 'sku.mapping', 'cid3.mapping', Config.file_map_skuId_cid3Id)
-
+        ProcessTrain.get_map_sku_cid3_id(Config.file_map_sku_cid3, 'sku.mapping', 'cid3.mapping',
+                                         Config.file_map_skuId_cid3Id)
 
     @classmethod
     def get_map_sku_cid3_org(cls, file_in, file_out):
         print "get_map_sku_cid3_org"
         file_in = Config.add_folder(file_in)
         file_out = Config.add_folder(file_out)
-        listlist=FileTool.read_file_to_list_list(file_in)
+        listlist = FileTool.read_file_to_list_list(file_in)
 
-        dict_sku_cid3={}
+        dict_sku_cid3 = {}
 
-        i=0
+        i = 0
         for list in listlist:
             for item in list:
                 arr = item.split('+')
                 sku = arr[0]
-                cid3=arr[2]
+                cid3 = arr[2]
                 dict_sku_cid3[sku] = cid3
 
-            i+=1
-            if(i% 10000 == 0):
+            i += 1
+            if (i % 10000 == 0):
                 print "%d/%d" % (i, len(listlist))
         FileTool.printDict(dict_sku_cid3, file_out)
 
     @classmethod
     def get_map_sku_cid3_id(cls, file_sku_cid3, file_sku, file_cid3, file_skuId_cid3Id):
         print "get_map_sku_cid3_org"
-        [file_sku_cid3, file_sku, file_cid3, file_skuId_cid3Id] = Config.add_folder_fileList([file_sku_cid3, file_sku, file_cid3, file_skuId_cid3Id])
+        [file_sku_cid3, file_sku, file_cid3, file_skuId_cid3Id] = Config.add_folder_fileList(
+            [file_sku_cid3, file_sku, file_cid3, file_skuId_cid3Id])
 
         map_skuStr_cid3Str = FileTool.load_file_map_colInt_colInt(file_sku_cid3)
         map_skuStr_skuId = FileTool.load_file_map_colInt_colInt(file_sku)
         map_cid3Str_cid3Id = FileTool.load_file_map_colInt_colInt(file_cid3)
 
-
         dict_skuId_cid3Id = {}
 
-        i=0
-        for (skuStr,cid3Str) in map_skuStr_cid3Str.items():
-	    if(skuStr not in map_skuStr_skuId):
+        i = 0
+        for (skuStr, cid3Str) in map_skuStr_cid3Str.items():
+            if (skuStr not in map_skuStr_skuId):
                 print "sku %d not in map" % skuStr
-            if(cid3Str not in map_cid3Str_cid3Id):
+            if (cid3Str not in map_cid3Str_cid3Id):
                 print "cid3 %d not in map" % cid3Str
 
-            if(skuStr in map_skuStr_skuId  and cid3Str in map_cid3Str_cid3Id):
+            if (skuStr in map_skuStr_skuId and cid3Str in map_cid3Str_cid3Id):
                 skuId = map_skuStr_skuId[skuStr]
                 cid3Id = map_cid3Str_cid3Id[cid3Str]
                 dict_skuId_cid3Id[skuId] = cid3Id
-            i+=1
-            if(i% 10000 == 0):
+            i += 1
+            if (i % 10000 == 0):
                 print "%d/%d" % (i, len(map_skuStr_cid3Str))
 
         FileTool.printDict(dict_skuId_cid3Id, file_skuId_cid3Id)
-
-
 
     @classmethod
     def get_file_data_sbcd(cls):
@@ -735,7 +736,7 @@ class ProcessTrain():
 
     @classmethod
     def analyse_file_data_sbcd(cls):
-        #ProcessTrain.analyse_file_sbcd_data_item()
+        # ProcessTrain.analyse_file_sbcd_data_item()
         ProcessTrain.analyse_file_interactions()
 
     @classmethod
@@ -755,9 +756,9 @@ class ProcessTrain():
                 continue
 
             sessionItem = SessionItem(item)
-            if(micro_type == "sku"):
+            if (micro_type == "sku"):
                 micro = sessionItem.sku
-            if(micro_type == "cid3"):
+            if (micro_type == "cid3"):
                 micro = sessionItem.cid3
 
             res.append(micro)
@@ -769,11 +770,10 @@ class ProcessTrain():
         uni_list = []
         cnt = 0
         for item in list:
-            if(item != pre):
+            if (item != pre):
                 cnt += 1
                 pre = item
         return cnt
-
 
     @classmethod
     def analyse_file_interactions_file_micro(cls, listlist, micro_type):
@@ -799,20 +799,18 @@ class ProcessTrain():
 
         FileTool.func_end("analyse_file_interactions_file")
 
-
     @classmethod
     def analyse_file_sbcd_data_item(cls):
         FileTool.func_begin("analyse_file_sbcd_data_item")
-        file_item="sbcd.id.test.item"
-        file_item=Config.add_folder(file_item)
+        file_item = "sbcd.id.test.item"
+        file_item = Config.add_folder(file_item)
 
         print file_item
         listlist = FileTool.read_file_to_list_list(file_item)
 
-
         cnt = 0
-        cnt_same_cid3=0
-        cnt_line_multi_cid3=0
+        cnt_same_cid3 = 0
+        cnt_line_multi_cid3 = 0
         for list in listlist:
             item1 = list[-2]
             item2 = list[-1]
@@ -823,27 +821,26 @@ class ProcessTrain():
             cnt += 1
 
             flag_same_cid3 = (sessionItem1.cid3 == sessionItem2.cid3)
-            if(flag_same_cid3):
+            if (flag_same_cid3):
                 cnt_same_cid3 += 1
 
-            list_cid3_set=set()
+            list_cid3_set = set()
             for item in list:
-                if(item == Config.paddingStr):
+                if (item == Config.paddingStr):
                     continue
                 sessionItem = SessionItem(item)
                 list_cid3_set.add(sessionItem.cid3)
-            if(len(list_cid3_set) > 1):
+            if (len(list_cid3_set) > 1):
                 cnt_line_multi_cid3 += 1
-
 
         str = "cnt_same_cid3, cnt, ratio: %d, %d, %f" % (cnt_same_cid3, cnt, cnt_same_cid3 / float(cnt))
         print str
 
-        str = "cnt_line_multi_cid3, cnt, ratio: %d, %d, %f" % (cnt_line_multi_cid3, cnt, cnt_line_multi_cid3 / float(cnt))
+        str = "cnt_line_multi_cid3, cnt, ratio: %d, %d, %f" % (
+        cnt_line_multi_cid3, cnt, cnt_line_multi_cid3 / float(cnt))
         print str
 
         FileTool.func_end("analyse_file_sbcd_data_item")
-
 
     @classmethod
     def get_file_sbcd_data_train(cls):
@@ -858,9 +855,12 @@ class ProcessTrain():
         file_mapping = FileTool.add_folder(Config.folder, "sbcd.id.mapping")
         dict_idInt_itemStr = Data.load_file_map_itemStr_idInt(file_mapping, True)
 
-        ProcessTrain.get_file_sbcd_data_train_micro_file(Config.folder, "sbcd.id.train", "sbcd.id.train.cid3", dict_idInt_itemStr)
-        ProcessTrain.get_file_sbcd_data_train_micro_file(Config.folder, "sbcd.id.train.div", "sbcd.id.train.div.cid3", dict_idInt_itemStr)
-        ProcessTrain.get_file_sbcd_data_train_micro_file(Config.folder, "sbcd.id.test", "sbcd.id.test.cid3", dict_idInt_itemStr)
+        ProcessTrain.get_file_sbcd_data_train_micro_file(Config.folder, "sbcd.id.train", "sbcd.id.train.cid3",
+                                                         dict_idInt_itemStr)
+        ProcessTrain.get_file_sbcd_data_train_micro_file(Config.folder, "sbcd.id.train.div", "sbcd.id.train.div.cid3",
+                                                         dict_idInt_itemStr)
+        ProcessTrain.get_file_sbcd_data_train_micro_file(Config.folder, "sbcd.id.test", "sbcd.id.test.cid3",
+                                                         dict_idInt_itemStr)
         FileTool.func_end("get_file_sbcd_data_train_micro")
         pass
 
@@ -873,12 +873,11 @@ class ProcessTrain():
 
         listlist = FileTool.read_file_to_list_list(file_in)
 
-
         listlist_res = []
         for list in listlist:
             listNew = []
             for item in list:
-                if(str(item) == Config.paddingStr):
+                if (str(item) == Config.paddingStr):
                     listNew.append(item)
                     continue
                 itemStr = dict_idInt_itemStr[int(item)]
@@ -895,30 +894,32 @@ class ProcessTrain():
     @classmethod
     def get_file_id_to_item(cls):
         FileTool.func_begin("get_file_id_to_item")
-        #ProcessTrain.trans_file_id_to_item(Config.folder, "sbcd.id.test", "sbcd.id.test.item", "sbcd.mapping")
-        #ProcessTrain.trans_file_id_to_item(Config.folder, "sbcd.id.test", "sbcd.id.test.id", "sbcd.id.mapping")
+        # ProcessTrain.trans_file_id_to_item(Config.folder, "sbcd.id.test", "sbcd.id.test.item", "sbcd.mapping")
+        # ProcessTrain.trans_file_id_to_item(Config.folder, "sbcd.id.test", "sbcd.id.test.id", "sbcd.id.mapping")
 
         ProcessTrain.trans_file_id_to_item(Config.folder, "sbcd.id.train", "sbcd.id.train.item", "sbcd.mapping")
         ProcessTrain.trans_file_id_to_item(Config.folder, "sbcd.id.train", "sbcd.id.train.id", "sbcd.id.mapping")
 
-
-        #ProcessTrain.trans_file_id_to_item(Config.folder, "sku.test", "sku.test.item", "sku.mapping")
+        # ProcessTrain.trans_file_id_to_item(Config.folder, "sku.test", "sku.test.item", "sku.mapping")
         FileTool.func_end("get_file_id_to_item")
 
     @classmethod
     def get_file_sbcd_pickle(cls):
         FileTool.func_begin("get_file_sbcd_pickle")
         micro_item_list = Config.get_micro_item_list("SBCD")
-        ProcessTrain.get_file_sbcd_pickle_bottom_to_micro(Config.folder, "sbcd.id.train", 1154771, "sbcd.id.mapping", micro_item_list)
-        #ProcessTrain.get_file_sbcd_pickle_bottom_to_micro(Config.folder, "sbcd.id.train.div", 23491738, "sbcd.id.mapping", micro_item_list)
-        #ProcessTrain.get_file_sbcd_pickle_bottom_to_micro(Config.folder, "sbcd.id.test", 20895, "sbcd.id.mapping", micro_item_list)
+        ProcessTrain.get_file_sbcd_pickle_bottom_to_micro(Config.folder, "sbcd.id.train", 1154771, "sbcd.id.mapping",
+                                                          micro_item_list)
+        # ProcessTrain.get_file_sbcd_pickle_bottom_to_micro(Config.folder, "sbcd.id.train.div", 23491738, "sbcd.id.mapping", micro_item_list)
+        # ProcessTrain.get_file_sbcd_pickle_bottom_to_micro(Config.folder, "sbcd.id.test", 20895, "sbcd.id.mapping", micro_item_list)
         FileTool.func_end("get_file_sbcd_pickle")
         pass
 
     @classmethod
-    def get_file_sbcd_pickle_bottom_to_micro(cls, folder, train_file, train_len, map_file_bottom_id_to_itemsId, micro_item_list):
+    def get_file_sbcd_pickle_bottom_to_micro(cls, folder, train_file, train_len, map_file_bottom_id_to_itemsId,
+                                             micro_item_list):
 
-        [train_file, map_file_bottom_id_to_itemsId] = FileTool.add_folder_fileList(folder, [train_file, map_file_bottom_id_to_itemsId])
+        [train_file, map_file_bottom_id_to_itemsId] = FileTool.add_folder_fileList(folder, [train_file,
+                                                                                            map_file_bottom_id_to_itemsId])
 
         [data_micro, total_data_line_cnt] = Data.load_data_trans_bottomId_to_microItemsId(train_file,
                                                                                           train_len,
@@ -932,7 +933,9 @@ class ProcessTrain():
     def trans_file_id_to_item(cls, folder, file_data_id, file_data_item, file_mapping):
         FileTool.func_begin("trans_file_id_to_item")
         print file_data_id
-        [file_data_id, file_data_item, file_mapping] = FileTool.add_folder_fileList(folder, [file_data_id, file_data_item, file_mapping])
+        [file_data_id, file_data_item, file_mapping] = FileTool.add_folder_fileList(folder,
+                                                                                    [file_data_id, file_data_item,
+                                                                                     file_mapping])
         list_list_dataId = FileTool.read_file_to_list_list(file_data_id)
         dict_idInt_itemStr = Data.load_file_map_itemStr_idInt(file_mapping, True)
 
@@ -950,9 +953,6 @@ class ProcessTrain():
 
         FileTool.printListList(list_list_res, file_data_item)
         FileTool.func_begin("trans_file_id_to_item")
-
-
-
 
     @classmethod
     def get_file_sbcd(cls):
@@ -1030,7 +1030,7 @@ class ProcessTrain():
         for list in listlist:
             listNew = []
             for item in list:
-                if(item == Config.paddingStr):
+                if (item == Config.paddingStr):
                     listNew.append(item)
                     continue
 

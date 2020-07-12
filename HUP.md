@@ -1,0 +1,36 @@
+##### 预处理
+
+- 先筛选出现次数符合要求的物品，写入`topsku`，得到`*.topsku`存了筛选物品后的原始数据
+  - min_cnt_sku_limit
+- 筛选满足session长度的数据 ，得到`*.topsku.len*`
+  - min_cnt_line_items和max_cnt_line_items
+- 得到`sku.raw`, `gap.raw`, `cid3.raw`, `bh.raw`, `dwell.raw` 以session为单位存了对应的属性
+- 去掉session中连续相同的物品，得到`sku.uniq`
+  - 以`sku.raw`为输入
+  - 但这个去掉连续相同的物品没有意义...后面就没用了
+- dwell和gap根据时间长度转换为对应编号，得到`dwell.id`, `gap.id`
+- 分别把`item`，`micro behavior`, `category`, `dwell`, `gap`转换为embedding，得到`sku.w2v`, `gap.w2v`, `cid3.w2v`, `bh.w2v`, `dwell.w2v`
+  - 不太清楚怎么得到embedding的，具体是通过wordvec.c得到的
+  - 根据`sku.uniq`得到`sku.w2v`
+- 得到reindex以后的各自的embedding和对应的mapping关系，根据`*.w2v`得到
+  - 重新对物品编了一下号
+  - embedding做了一个归一化
+  - 得到各自的`.reidx`, `.mapping`
+- 得到每个物品最相似的k个物品，得到`top1000sku`
+  - 目前不知道有啥用
+- 将原始数据根据之前得到的mapping转换，得到`session.SBCGD`
+- 把SBCGD映射成一个id，得到`session.SBCGD.id`和`session.SBCGD.id.mapping`
+- 分成Train和Test，得到`session.SBCGD.train`, `session.SBCGD.test`
+  - Train和Test是随机分的
+- 截断train和test
+  - 截取了前seq_len_max个，并且**保证了预测物品和最后一次点击不是一个物品id**
+    - 比如 1 2 3 4 5 6 7 8 9 9 9 9 9 -> 1 2 3 4 5 6 7 8 9
+  - 得到`session.SBCGD.id.len*.train`,`session.SBCGD.id.len*.test`
+- 得到`session.SBCGD.id.len*.train.div`
+  - **类似数据增强？**，因为前面train只截取了前seq_len_max个，这里比如session长度为32，会得到[0,30],[0,31]两条数据
+- 由`session.SBCGD.id.len*.train`, `session.SBCGD.id.len*.test`, `session.SBCGD.id.len*.train.div` 得到完整的SBCGD数据
+  - 会去掉**连续相同**的SBCGD
+  - 得到`session.SBCGD.id.len*.SBCGD.train`, `session.SBCGD.id.len*.SBCGD.test`, `session.SBCGD.id.len*.SBCGD.train.div`
+- 将SBCGD转换成对应的embedding，会padding，因为之前删掉了连续相同的SBCGD，所以可能会缺失
+  - 对SBCGD重新编号，得到reindex后的`session.SBCGD.id.len*.SBCGD.id.train`, `session.SBCGD.id.len*.SBCGD.id.test`, `session.SBCGD.id.len*.SBCGD.id.train.div`
+  - 得到SBCGD编号对应的mapping文件`session.SBCGD.id.len30.SBCGD.mapping`和embedding文件`session.SBCGD.id.len30.SBCGD.reidx`
