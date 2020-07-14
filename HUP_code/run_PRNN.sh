@@ -13,10 +13,10 @@ RNN_norm="LSTM"
 bottom_emb_item_len=5
 
 
-folder_type="Applicances"
-#folder_type="Computers"
+#folder_type="Applicances"
+folder_type="Computers"
 
-folder_base='/export/sdb/home/guyulong/program/HUP/HUP_Data'
+folder_base='/home/cbd109/Users/szh/WSDM2020_HUP-master/HUP_Data'
 folder_data_input=""
 folder_data_model='Model/Model_'
 folder_data_log="Log/Log_"
@@ -139,7 +139,7 @@ fi
 
 
 
-cmd="THEANO_FLAGS='device=${device}' nohup python -u PRNNRec.py ${model_tag} ${layer_num} ${rnn_state_size} ${bottom_emb_item_len} ${flag_embedding_trainable} ${folder_input} ${folder_output} ${exp_sig} ${init_emb_wgt_path} ${file_train} ${file_test} ${train_len} ${test_len} ${seq_len} ${batch_size} ${file_model} ${file_mapping} top1000sku sku.mapping ${flag_train_model} ${train_epoch} ${flag_test_candidate_all} ${mode_attention} ${drop_out_r} ${loss_weights_sku_cid3} ${att_layer_cnt} ${bhDwellAtt} ${rnn_type} ${RNN_norm} > ${file_log} &"
+cmd="THEANO_FLAGS='device=${device}' nohup python -u PRNNRec.py ${model_tag} ${layer_num} ${rnn_state_size} ${bottom_emb_item_len} ${flag_embedding_trainable} ${folder_input} ${folder_output} ${exp_sig} ${init_emb_wgt_path} ${file_train} ${file_test} ${train_len} ${test_len} ${seq_len} ${batch_size} ${file_model} ${file_mapping} top1000sku sku.mapping ${flag_train_model} ${train_epoch} ${flag_test_candidate_all} ${mode_attention} ${drop_out_r} ${loss_weights_sku_cid3} ${att_layer_cnt} ${bhDwellAtt} ${rnn_type} ${RNN_norm} > ${file_log} 2>&1 &"
 echo ${cmd}
 
 eval ${cmd}

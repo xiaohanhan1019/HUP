@@ -1,3 +1,4 @@
+# coding=utf-8
 import pandas as pd
 import numpy as np
 import time
@@ -37,14 +38,14 @@ def get_time_info(start_time):
 
 
 print "matrix mul..."
-r = np.matmul(w, w.transpose())
-
-del w
-gc.collect()
-
-print "matrix sort..."
-# res = np.argsort(-r, axis=1)[:, :N]
-res = (-r).argsort(axis=1)[:, :N]
+# 改写
+item_cnt = w.shape[0]
+res = np.zeros((item_cnt, N), dtype=np.int)
+for i in range(item_cnt):
+    if i % 1000 == 0:
+        print i
+    temp = np.matmul(w[i], w.transpose())
+    res[i] = (-temp).argsort(axis=0)[:N]
 
 print "res:"
 print res.shape
