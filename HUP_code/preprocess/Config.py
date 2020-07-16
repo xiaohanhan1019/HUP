@@ -15,7 +15,7 @@ class Config:
     data_source_name = ['Computers', 'Applicances']
 
     # select dataset
-    data_source_index = 0
+    data_source_index = 1
     data_source = data_source_name[data_source_index]
     seq_len_min = 40
     seq_len_max = 40

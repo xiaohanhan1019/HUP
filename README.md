@@ -1,136 +1,96 @@
-Hierarchical User Profiling for E-commerce Recommender Systems (WSDM 2020)
-============
+### 参数
 
-# HUP:
+##### Config.py
 
-   HUP_code is the code for the paper "[Hierarchical User Profiling for E-commerce Recommender Systems](https://dl.acm.org/doi/abs/10.1145/3336191.3371827)", which is published in WSDM 2020. The code is written in Keras 2.2 and theano 1.0. 
+- `train_ratio`：train:test=7:3，随机分
 
-   HUP_Data is the folder that contains the dataset.
+- `min_cnt_sku_limit`：去掉数据集中出现次数少于min_cnt_sku_limit的物品
 
-![The proposed framework](PRNN.png)
+  - 两个数据集都取50
 
-## Requirements
+- `min_cnt_line_items`：session长度
 
-python==2.7
+  - computers取30
+  - appliance取40
 
-keras==2.2.0
+- `embedding`大小:
 
-theano=1.0.1
+  - 物品(sku)：30
 
-numpy=1.13.1
+  - 行为(bh)：5
 
-pandas=0.20.3
+  - 类别(cid3)：8
 
-## Usage
+  - 停留时间(dwell)：5
 
-```sh run.sh```
+    - | dwell time bucket | dwell time range |
+      | ----------------- | ---------------- |
+      | 1                 | 0~15 seconds     |
+      | 2                 | 15~40 seconds    |
+      | 3                 | 40~100 seconds   |
+      | 4                 | 100~600 seconds  |
+      | 5                 | 600+ seconds     |
 
-# Datasets:
+  - 两次click间隔(gap)：5
 
-  JD Micro Behaviors Datasets.
+    - | time interval bucket | time interval range |
+      | -------------------- | ------------------- |
+      | 1                    | 0~1 seconds         |
+      | 2                    | 1~15 seconds        |
+      | 3                    | 15~40 seconds       |
+      | 4                    | 40~90 seconds       |
+      | 5                    | 90+ seconds         |
 
-## Description:
+##### PRNNRec.py
 
-The datasets are used for research on modeling users' sequential micro-behaviors in "Hierarchical User Profiling for E-commerce Recommender Systems", which is published in WSDM 2020.
-
-The datasets contain users’ micro-behaviors in two product categories “Appliances” and “Computers”, where each line is a sequence of a user’s micro behaviors in a session. 
-
-## Statistics:
-
-
-| Dataset | JD-Applicances | JD-Computers | Desc                            |
-| ---------- | ---------- | ---------- | ------------------------------- |
-| Users | 6,166,916    | 3,191,573 | users                           |
-| Products | 169,856 | 419,388 | SKUs            |
-| Categories | 103 | 93 | Leaf categories |
-| Number of Micro behaviors      | 176,483,033 | 88,766,833 | micro behaviors |
-
-## Research Topics:
-
-This dataset can be used for research on User Profiling, Recommender Systems, Session-based Recommender Systems, Micro-behaviors Modeling, and so on. To protect the privacy of users, we remove the users' information. This dataset should only be used for research purpose!
-
-## Citation:
-
-Please cite the following paper if you use the data in any way.
-
-```
-@inproceedings{gu2020hierarchical,
-  title={Hierarchical User Profiling for E-commerce Recommender Systems},
-  author={Gu, Yulong and Ding, Zhuoye and Wang, Shuaiqiang and Yin, Dawei},
-  booktitle={Proceedings of the 13th International Conference on Web Search and Data Mining},
-  pages={223--231},
-  year={2020}
-}
-```
-
-## Download link:
-
-The full dataset can be downloaded from https://drive.google.com/open?id=1kz7Dkq5jQ8WR82xBITyQ7S4vUgBFNsDn.
-
-## File Description:
-
-Each line is a sequence of a user’s micro behaviors in a session. 
-
-Each micro-behavior is in the format of "**sku + behavior_type + category + time_interval + dwell_time**", where "SKU" is id of the product, "behavior_type" is the type of micro-behavior, "category“ is the leaf category of the product, time_interval is the time interval between two consecutive micro behiaviors, dwell_time is the dwell time in each product.  
-
-For example, "1993092+7+870+22+27" is a micro-behavior, which means that a user read the specification of product "1993092" (in the leaf category "870"). The time interval between this micro behavior and next micro behavior is 22 seconds. The user spends 27 seconds in this product.
-
-#### SKU:
-
-​       "SKU", which is Short for "Stock Keeping Unit", is the alias of product (i.e. item) in E-commerce.
-
-​       For a SKU "1993092" in the "JD-Applicances" Dataset, the information of the item is in the webpage "https://item.jd.com/1993092.html".
-
-#### behavior_type:
-
-| behavior_type | Micro behaviors      | Description                                  |
-| ------------- | -------------------- | -------------------------------------------- |
-| 1             | Home2Product         | Browse the product from the homepage         |
-| 2             | ShopList2Product     | Browse the product from the category page    |
-| 3             | Sale2Product         | Browse the product from the sale page        |
-| 4             | Cart2Product         | Browse the product from the carted page      |
-| 5             | SearchList2Product   | Browse the product from the searched results |
-| 6             | Detail_comments      | Read the comments of the product             |
-| 7             | Detail_specification | Read the specification of the product        |
-| 8             | Detail_bottom        | Read the bottom of page of the product       |
-| 9             | Cart                 | Add the product to the shopping cart         |
-| 10            | Order                | Make an order                                |
-
-#### category:
-
-​      It is the leaf category of a product.
-
-#### time_interval:
-
-​      Time intervals is the time between two micro-behaviors.  
-
-​      In the experiments, we discretize them into 5 buckets as following.
-
-| time interval bucket | time interval range |
-| -------------------- | ------------------- |
-| 1                    | 0~1 seconds         |
-| 2                    | 1~15 seconds        |
-| 3                    | 15~40 seconds       |
-| 4                    | 40~90 seconds       |
-| 5                    | 90+ seconds         |
+- `layer_num`，RNN的个数？：3
+- `rnn_state_size`，RNN隐藏层大小：100，100，100
+- `bottom_emb_item_len`，用了多少个embedding（比如SBCGD就是5）：5
+- `train_len`，训练集长度：577507(computer)，583282(appliance)
+- `test_len`，测试集长度：246967(computer)，250776(appliance)
+- `seq_len`，session长度：29(computer)，39(appliance)
+- `batch_size`：128
+- `epoch`：2
+- `drop_out_r`：0
+- `loss_weights`，每个loss的权重：0，0.5，0.5
+- `learning_rate`：代码里没有设置，他用了RMSprop，应该是使用了keras默认的参数lr=1e-3
 
 
 
-#### dwell_time:
+### 预处理流程
 
-​      Dwell time is the length of time a user spends in an item. 
-
-​      It should be noted that multiple micro behaviors under a product share the same dwell time, during which the user may perform multiple micro-behaivors on the product.
-
-​      In the experiments, we discretize them into 5 buckets as following.
-
-| dwell time bucket | dwell time range |
-| ----------------- | ---------------- |
-| 1                 | 0~15 seconds     |
-| 2                 | 15~40 seconds    |
-| 3                 | 40~100 seconds   |
-| 4                 | 100~600 seconds  |
-| 5                 | 600+ seconds     |
-
-
-
+- 先筛选出现次数符合要求的物品，写入`topsku`，得到`*.topsku`存了筛选物品后的原始数据
+  - min_cnt_sku_limit
+- 筛选满足session长度的数据 ，得到`*.topsku.len*`
+  - min_cnt_line_items和max_cnt_line_items
+- 得到`sku.raw`, `gap.raw`, `cid3.raw`, `bh.raw`, `dwell.raw` 以session为单位存了对应的数据
+- 去掉session中连续相同的物品，得到`sku.uniq`
+  - 以`sku.raw`为输入
+  - 但这个去掉连续相同的物品没有意义...后面就没用了
+- dwell和gap根据时间长度转换为对应编号，得到`dwell.id`, `gap.id`
+- 分别把`item`，`micro behavior`, `category`, `dwell`, `gap`转换为embedding，得到`sku.w2v`, `gap.w2v`, `cid3.w2v`, `bh.w2v`, `dwell.w2v`
+  - 不太清楚怎么得到embedding的，具体是通过wordvec.c文件得到的
+  - 根据`sku.uniq`得到`sku.w2v`
+- 得到reindex以后的各自的embedding和对应的mapping关系，根据`*.w2v`得到
+  - 重新对物品编了一下号
+  - embedding做了一个归一化
+  - 得到各自的`*.reidx`, `*.mapping`
+- 得到每个物品最相似的k个物品，得到`top1000sku`
+  - 由于内存不够，我直接重写了这个文件`my_top1000.py`，输出和原来一样，只是原来是矩阵计算完一起输出，我是一条一条输出
+- 将原始数据根据之前得到的mapping转换，得到`session.SBCGD`
+- 把SBCGD整体映射成一个id，得到`session.SBCGD.id`和`session.SBCGD.id.mapping`
+- 分成Train和Test，得到`session.SBCGD.train`, `session.SBCGD.test`
+  - Train和Test是随机分的，7：3
+- 截断train和test
+  - **截取了前seq_len_max个**，并且**保证了预测物品和最后一次点击不是一个物品id**
+    - 比如 1 2 3 4 5 6 7 8 9 9 9 9 9 -> 1 2 3 4 5 6 7 8 9
+  - 得到`session.SBCGD.id.len*.train`,`session.SBCGD.id.len*.test`
+- 得到`session.SBCGD.id.len*.train.div`
+  - **数据增强？**，前面train只截取了**前seq_len_max**个，这里比如session长度为32，会得到[0,30],[0,31]两条数据
+  - 但是`run_PRNN.sh`里面并**没有使用**数据增强后的数据进行训练
+- 由`session.SBCGD.id.len*.train`, `session.SBCGD.id.len*.test`, `session.SBCGD.id.len*.train.div` 得到完整的SBCGD数据
+  - 会去掉**连续相同**的SBCGD
+  - 得到`session.SBCGD.id.len*.SBCGD.train`, `session.SBCGD.id.len*.SBCGD.test`, `session.SBCGD.id.len*.SBCGD.train.div`
+- 将SBCGD转换成对应的embedding，会padding，因为之前删掉了连续相同的SBCGD，所以可能会缺失
+  - 对SBCGD重新编号，得到reindex后的`session.SBCGD.id.len*.SBCGD.id.train`, `session.SBCGD.id.len*.SBCGD.id.test`, `session.SBCGD.id.len*.SBCGD.id.train.div`
+  - 得到SBCGD编号对应的mapping文件`session.SBCGD.id.len30.SBCGD.mapping`和embedding文件`session.SBCGD.id.len30.SBCGD.reidx`

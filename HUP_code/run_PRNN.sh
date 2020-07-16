@@ -13,10 +13,10 @@ RNN_norm="LSTM"
 bottom_emb_item_len=5
 
 
-#folder_type="Applicances"
-folder_type="Computers"
+folder_type="Applicances"
+#folder_type="Computers"
 
-folder_base='/home/cbd109/Users/szh/WSDM2020_HUP-master/HUP_Data'
+folder_base='/home/cbd109/Users/Data/szh/szh/WSDM2020_HUP-master/HUP_Data'
 folder_data_input=""
 folder_data_model='Model/Model_'
 folder_data_log="Log/Log_"
